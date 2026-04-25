@@ -7,7 +7,11 @@ const schema = z.object({
   PORT: z.coerce.number().int().positive().default(5000),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
-  CLIENT_URL: z.string().url("CLIENT_URL must be a valid URL").default("http://localhost:5173"),
+  CLIENT_URL: z
+    .string()
+    .url("CLIENT_URL must be a valid URL")
+    .default("http://localhost:5173")
+    .transform((s) => s.replace(/\/+$/, "")),
   COOKIE_SAMESITE: z.enum(["lax", "strict", "none"]).default("lax"),
   APP_NAME: z.string().default("Vibe"),
   CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
