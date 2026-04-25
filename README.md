@@ -1,4 +1,4 @@
-# Vibe Chat — MERN + Socket.io
+# Vibe — MERN + Socket.io chat app
 
 Real-time chat app with auth, presence, image sharing, and unread indicators.
 

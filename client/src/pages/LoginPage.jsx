@@ -31,7 +31,10 @@ const LoginPage = () => {
       className="min-h-screen flex items-center justify-center gap-12 px-4 sm:px-16 flex-col sm:flex-row bg-cover bg-center"
       style={{ backgroundImage: `url(${assets.bgImage})` }}
     >
-      <img src={assets.logo_big} alt="Vibe Chat" className="w-[min(40vw,260px)]" />
+      <div className="flex flex-col items-center gap-3">
+        <img src={assets.logo_big} alt="Vibe" className="w-[min(28vw,180px)]" />
+        <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight">Vibe</h1>
+      </div>
 
       <form
         onSubmit={onSubmitHandler}
