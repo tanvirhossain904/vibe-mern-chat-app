@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.jsx";
 import assets from "../assets/assets.js";
 
@@ -100,6 +101,12 @@ const LoginPage = () => {
         >
           {currentState === "signup" ? "Create Account" : "Login Now"}
         </button>
+
+        {currentState === "login" && !isDataSubmitted && (
+          <p className="text-sm text-gray-300">
+            <Link to="/forgot-password" className="text-violet-300">Forgot password?</Link>
+          </p>
+        )}
 
         <p className="text-sm text-gray-300">
           {currentState === "signup" ? "Already have an account?" : "New here?"}{" "}

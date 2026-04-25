@@ -5,14 +5,31 @@ import { io } from "socket.io-client";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 axios.defaults.baseURL = backendUrl;
+axios.defaults.withCredentials = true;
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [authUser, setAuthUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
+
+  const connectSocket = (userData) => {
+    if (!userData) return;
+    const newSocket = io(backendUrl, {
+      withCredentials: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
+    });
+    newSocket.on("getOnlineUsers", setOnlineUsers);
+    newSocket.on("connect_error", (err) => {
+      if (err.message === "Unauthorized") {
+        setAuthUser(null);
+      }
+    });
+    setSocket(newSocket);
+  };
 
   const checkAuth = async () => {
     try {
@@ -21,8 +38,10 @@ export const AuthProvider = ({ children }) => {
         setAuthUser(data.user);
         connectSocket(data.user);
       }
-    } catch (error) {
-      toast.error(error.message);
+    } catch {
+      // not authenticated; treat as logged out
+    } finally {
+      setAuthChecked(true);
     }
   };
 
@@ -30,28 +49,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await axios.post(`/api/auth/${state}`, credentials);
       if (data.success) {
-        setAuthUser(data.userData);
-        connectSocket(data.userData);
-        axios.defaults.headers.common["token"] = data.token;
-        setToken(data.token);
-        localStorage.setItem("token", data.token);
-        toast.success(data.message);
-      } else {
-        toast.error(data.message);
+        setAuthUser(data.user);
+        connectSocket(data.user);
+        toast.success(state === "signup" ? "Account created" : "Welcome back");
       }
-    } catch (error) {
-      toast.error(error.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Request failed");
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
+  const logout = async () => {
+    try {
+      await axios.post("/api/auth/logout");
+    } catch {
+      // ignore
+    }
+    socket?.disconnect();
+    setSocket(null);
     setAuthUser(null);
     setOnlineUsers([]);
-    axios.defaults.headers.common["token"] = null;
     toast.success("Logged out");
-    socket?.disconnect();
   };
 
   const updateProfile = async (body) => {
@@ -61,34 +78,40 @@ export const AuthProvider = ({ children }) => {
         setAuthUser(data.user);
         toast.success("Profile updated");
       }
-    } catch (error) {
-      toast.error(error.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Update failed");
     }
   };
 
-  const connectSocket = (userData) => {
-    if (!userData || socket?.connected) return;
-    const newSocket = io(backendUrl, { query: { userId: userData._id } });
-    newSocket.connect();
-    setSocket(newSocket);
-    newSocket.on("getOnlineUsers", (userIds) => setOnlineUsers(userIds));
+  const deleteAccount = async () => {
+    try {
+      const { data } = await axios.delete("/api/auth/me");
+      if (data.success) {
+        socket?.disconnect();
+        setSocket(null);
+        setAuthUser(null);
+        setOnlineUsers([]);
+        toast.success("Account deleted");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Delete failed");
+    }
   };
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common["token"] = token;
-      checkAuth();
-    }
+    checkAuth();
   }, []);
 
   const value = {
     axios,
     authUser,
+    authChecked,
     onlineUsers,
     socket,
     login,
     logout,
     updateProfile,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

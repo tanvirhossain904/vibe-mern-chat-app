@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(curl -s -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"notreal@x.com\",\"password\":\"longenoughpw\"}' -w \"\\\\n--- HTTP %{http_code}\\\\n\")",
+      "Bash(curl -s -X POST http://localhost:5000/api/auth/signup -H \"Content-Type: application/json\" -d '{\"email\":\"a@b.com\",\"password\":\"123\",\"fullName\":\"X\"}' -w \"\\\\n--- HTTP %{http_code}\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"PUT /messages/<bad-id> unauth: %{http_code}\\\\n\" -X PUT http://localhost:5000/api/messages/abc -H \"Content-Type: application/json\" -d '{\"text\":\"hi\"}')",
+      "Bash(curl -s -o /dev/null -w \"DELETE /messages/<bad-id> unauth: %{http_code}\\\\n\" -X DELETE http://localhost:5000/api/messages/abc)",
+      "Bash(npm test *)"
     ]
   }
 }
