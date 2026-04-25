@@ -48,7 +48,10 @@ const Sidebar = () => {
       }`}
     >
       <div className="flex justify-between items-center mb-5">
-        <img src={assets.logo} alt="Vibe" className="h-7" />
+        <div className="flex items-center gap-2">
+          <img src={assets.logo_icon} alt="" className="h-7 w-7" />
+          <span className="text-lg font-medium tracking-tight">Vibe</span>
+        </div>
         <div className="relative group py-2">
           <img src={assets.menu_icon} alt="menu" className="w-5 cursor-pointer opacity-80" />
           <div className="absolute right-0 top-full hidden group-hover:flex flex-col bg-[#282142] rounded p-3 text-sm gap-2 z-10 min-w-[140px] border border-white/10 shadow-lg">
