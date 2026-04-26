@@ -11,7 +11,7 @@ const LoginPage = () => {
   const [bio, setBio] = useState("");
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
-  const { login } = useContext(AuthContext);
+  const { login, guestLogin, guestLoading, wakingUp } = useContext(AuthContext);
 
   const onSubmitHandler = (event) => {
     event.preventDefault();
@@ -101,6 +101,32 @@ const LoginPage = () => {
         >
           {currentState === "signup" ? "Create Account" : "Login Now"}
         </button>
+
+        <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-gray-400">
+          <span className="flex-1 h-px bg-white/15" />
+          <span>or</span>
+          <span className="flex-1 h-px bg-white/15" />
+        </div>
+
+        <button
+          type="button"
+          onClick={guestLogin}
+          disabled={guestLoading}
+          aria-label="Login as Guest — try the demo without signing up"
+          className="relative py-3 rounded font-medium border-2 border-amber-400/70 text-amber-100 bg-amber-400/10 hover:bg-amber-400/20 hover:border-amber-300 transition shadow-[0_0_18px_-6px_rgba(251,191,36,0.6)] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {guestLoading ? (
+            <>
+              <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-amber-200 rounded-full animate-spin" />
+              <span>{wakingUp ? "Waking up server… (free tier, ~30s)" : "Logging in…"}</span>
+            </>
+          ) : (
+            <span>Try the Demo — Login as Guest</span>
+          )}
+        </button>
+        <p className="text-xs text-gray-400 text-center -mt-2">
+          No signup needed. Explore Vibe with sample chats already loaded.
+        </p>
 
         {currentState === "login" && !isDataSubmitted && (
           <p className="text-sm text-gray-300">

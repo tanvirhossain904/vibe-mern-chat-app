@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { Server } from "socket.io";
 import { connectDB } from "./lib/db.js";
 import { logger } from "./lib/logger.js";
+import { seedGuest } from "./lib/seedGuest.js";
 import { attachRedisAdapter } from "./lib/socketAdapter.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
@@ -89,6 +90,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 await connectDB();
+await seedGuest();
 await attachRedisAdapter(io);
 
 server.listen(env.PORT, () => logger.info(`Server listening on port ${env.PORT}`));

@@ -14,6 +14,8 @@ export const AuthProvider = ({ children }) => {
   const [authChecked, setAuthChecked] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [wakingUp, setWakingUp] = useState(false);
 
   const connectSocket = (userData) => {
     if (!userData) return;
@@ -55,6 +57,32 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Request failed");
+    }
+  };
+
+  const guestLogin = async () => {
+    if (guestLoading) return;
+    setGuestLoading(true);
+    setWakingUp(false);
+    // Free-tier hosts (Render etc.) cold-start in ~30s. Show a hint after 3s.
+    const wakingTimer = setTimeout(() => setWakingUp(true), 3000);
+    try {
+      const { data } = await axios.post(
+        "/api/auth/login",
+        { email: "guest@vibe.com", password: "password123" },
+        { timeout: 60_000 }
+      );
+      if (data.success) {
+        setAuthUser(data.user);
+        connectSocket(data.user);
+        toast.success("Welcome, Guest!");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Guest login failed");
+    } finally {
+      clearTimeout(wakingTimer);
+      setWakingUp(false);
+      setGuestLoading(false);
     }
   };
 
@@ -109,6 +137,9 @@ export const AuthProvider = ({ children }) => {
     onlineUsers,
     socket,
     login,
+    guestLogin,
+    guestLoading,
+    wakingUp,
     logout,
     updateProfile,
     deleteAccount,
